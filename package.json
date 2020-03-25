@@ -1,0 +1,28 @@
+{
+  "name": "discordpointsbot",
+  "version": "1.0.0",
+  "description": "A points bot for our discord quizzes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nagendra-KJ/DiscordPointsBot.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "quiz",
+    "points"
+  ],
+  "author": "Nagendra Kumar Jamadagni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nagendra-KJ/DiscordPointsBot/issues"
+  },
+  "homepage": "https://github.com/Nagendra-KJ/DiscordPointsBot#readme",
+  "dependencies": {
+    "discord.js": "^12.0.2"
+  }
+}
