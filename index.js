@@ -278,7 +278,9 @@ bot.on('message' ,(msg)=>{
         break;
         case "points":
             if(!args[1])
-                sendPoints(msg);
+                sendError(msg,ARGS_ERR);
+            else if(args[1]=="show")
+                showPoints(msg);
             else if(args[1]=="podium")
                 sendPodium(msg);
             else
@@ -351,7 +353,7 @@ function shuffle(arr)
     return arr;
 }
 
-function sendPoints(msg)
+function showPoints(msg)
 {
     let pointsTable="";
     teamList.forEach((team,i)=>{
