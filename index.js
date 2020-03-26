@@ -36,10 +36,10 @@ bot.on('message' ,(msg)=>{
     let args = msg.content.substring(PREFIX.length).split(" ");
     switch(args[0])
     {
-        case "Init":
+        case "init":
             init(msg);
         break;
-        case "Clear":
+        case "clear":
             if(!args[1])
             {
                 sendError(msg,ARGS_ERR);
@@ -49,7 +49,7 @@ bot.on('message' ,(msg)=>{
                 msg.channel.bulkDelete(args[1]);
             }
             break;
-        case "Remind":
+        case "remind":
             if(!args[1])
             {
                 sendError(msg,ARGS_ERR);
@@ -58,13 +58,13 @@ bot.on('message' ,(msg)=>{
             {
                 switch(args[1])
                 {
-                    case "Pounce":
+                    case "pounce":
                         startPounce(msg);
                         break;
-                    case "Bounce":
+                    case "bounce":
                         startBounce(msg);
                         break;
-                    case "Clock":
+                    case "clock":
                         msg.channel.send("Pounce closing in 5.");
                         break;
                     default:
@@ -72,7 +72,7 @@ bot.on('message' ,(msg)=>{
                 }
             }
             break;
-        case "Randomise":
+        case "randomise":
             if(!args[1])
             {
                 sendError(msg,ARGS_ERR);
@@ -80,7 +80,7 @@ bot.on('message' ,(msg)=>{
             }
             randomise(msg,args[1]);
             break;
-        case "Team":
+        case "team":
             if(!args[1])
             {
                 sendError(msg,ARGS_ERR);
@@ -188,7 +188,7 @@ bot.on('message' ,(msg)=>{
                     sendError(msg);
             }
             break;
-        case "User":
+        case "user":
             if(!args[1])
             {
                 sendError(msg,ARGS_ERR);
@@ -207,7 +207,7 @@ bot.on('message' ,(msg)=>{
             index = parseInt(args[1])-1;
             if(args[2] == "set")
             {
-                if(args[3] == "QM")
+                if(args[3] == "qm")
                 {
                     if(userList[index].getTeam() == 0)
                     {
@@ -244,7 +244,7 @@ bot.on('message' ,(msg)=>{
             }
             else if(args[2] == "unset")
             {
-                if(args[3] == "QM")
+                if(args[3] == "qm")
                 {
                     userList[index].setQM(false);
                     return;
@@ -276,7 +276,7 @@ bot.on('message' ,(msg)=>{
             else
                 sendError(msg);
         break;
-        case "Points":
+        case "points":
             if(!args[1])
                 sendPoints(msg);
             else if(args[1]=="podium")
