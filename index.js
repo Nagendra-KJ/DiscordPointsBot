@@ -3,7 +3,11 @@ const bot = new Discord.Client();
 
 const Teams = require('./teams');
 
+const Users = require('./users');
+
 const token = "NjkyMzk3MzQxMTA1NDU1MTM1.XnuASg.i7PzwypQp6hzNFQoUbwJ8ilNm0k";
+
+const ARGS_ERR ="I need more arguments.";
 
 const PREFIX = "$";
 
@@ -14,6 +18,10 @@ var teamSize;
 var numPlayers;
 
 var teamList = [];
+
+var userList=[];
+
+var index;
 
 bot.login(token);
 
@@ -28,20 +36,23 @@ bot.on('message' ,(msg)=>{
     let args = msg.content.substring(PREFIX.length).split(" ");
     switch(args[0])
     {
+        case "Init":
+            init(msg);
+        break;
         case "Clear":
             if(!args[1])
             {
-                sendError(msg,"I need more arguments.");
+                sendError(msg,ARGS_ERR);
             }
             else
             {
                 msg.channel.bulkDelete(args[1]);
             }
             break;
-        case "Start":
+        case "Remind":
             if(!args[1])
             {
-                sendError(msg,"I need more arguments.");
+                sendError(msg,ARGS_ERR);
             }
             else
             {
@@ -53,6 +64,9 @@ bot.on('message' ,(msg)=>{
                     case "Bounce":
                         startBounce(msg);
                         break;
+                    case "Clock":
+                        msg.channel.send("Pounce closing in 5.");
+                        break;
                     default:
                         sendError(msg,"Those are invalid arguments.");
                 }
@@ -61,15 +75,25 @@ bot.on('message' ,(msg)=>{
         case "Randomise":
             if(!args[1])
             {
-                sendError(msg,"I need more arguments.");
+                sendError(msg,ARGS_ERR);
                 return;
             }
             randomise(msg,args[1]);
             break;
         case "Team":
-            if(!args[1] || !args[2])
+            if(!args[1])
             {
-                sendError(msg,"I need more arguments.");
+                sendError(msg,ARGS_ERR);
+                return;
+            }
+            if(args[1]=="show")
+            {
+                showTeam(msg);
+                return;
+            }
+            if(!args[2])
+            {
+                sendError(msg,"I need more arguments");
                 return;
             }
             if(args[1]=="create")
@@ -80,7 +104,7 @@ bot.on('message' ,(msg)=>{
             }
             if(!args[3])
             {
-                sendError(msg,"I need more arguments.");
+                sendError(msg,ARGS_ERR);
                 return;
             }
             if(parseInt(args[1])>teamList.length)
@@ -88,7 +112,7 @@ bot.on('message' ,(msg)=>{
                 sendError(msg,"That doesn't exist.");
                 return;
             }
-            let index = parseInt(args[1])-1;
+            index = parseInt(args[1])-1;
             switch(args[2])
             {
                 case "get":
@@ -100,7 +124,7 @@ bot.on('message' ,(msg)=>{
                         teamList[index].getMembers().forEach(member=>{
                             members=members+member+" ";
                         });
-                        msg.channel.send(members+" are the memebers of team "+(index+1));
+                        msg.channel.send(members+" are the members of team "+(index+1));
                     }
                     else
                     {
@@ -110,26 +134,53 @@ bot.on('message' ,(msg)=>{
                 case "add":
                     if(!args[4])
                     {
-                        sendError(msg,"I need more arguments.");
+                        sendError(msg,ARGS_ERR);
                         return;
                     }
                     if(args[3] == "points")
                         teamList[index].addPoints(parseInt(args[4]));
                     else if(args[3] == "member")
-                        teamList[index].addMember(args[4]);
+                    {
+                        let pos = userExists(args[4]);
+                        if(pos>-1 && userList[pos].getTeam()==0 && !userList[pos].getQM())
+                        {
+                            teamList[index].addMember(userList[pos].getName());
+                            userList[pos].setTeam(index+1);
+                        }
+                        else
+                        {
+                            sendError(msg,"That user cannot be in that team.");
+                        }
+                    }
                     else
                         sendError(msg);
                 break;
                 case "remove":
                     if(!args[4])
                     {
-                        sendError(msg,"I need more arguments.");
+                        sendError(msg,ARGS_ERR);
                         return;
                     }
                     if(args[3] == "points")
                         teamList[index].addPOints(parseInt(args[4]*-1));
                     else if(args[3] == "member")
-                        teamList[index].removeMembers(args[4]);
+                    {
+                        let pos = userExists(args[4]);
+                        if(pos>-1)
+                        {
+                            if(teamList[index].members.indexOf(userList[pos].getName(),0)>-1)
+                            {
+                                userList[index].setTeam(0);
+                                teamList[index].removeMember(userList[pos].getName());
+                            }
+                            else
+                            {
+                                sendError(msg,"That user cannot me removed from that team.");
+                            }
+                        }
+                        else
+                            sendError(msg,"That user doesn't exist");
+                    }
                     else
                         sendError(msg);
                 break;
@@ -137,6 +188,94 @@ bot.on('message' ,(msg)=>{
                     sendError(msg);
             }
             break;
+        case "User":
+            if(!args[1])
+            {
+                sendError(msg,ARGS_ERR);
+                return;
+            }
+            if(args[1]=="show")
+            {
+                list(msg);
+                return;
+            }
+            if(!args[2] || !args[3])
+            {
+                sendError(msg,"I need more arguments");
+                return;
+            }
+            index = parseInt(args[1])-1;
+            if(args[2] == "set")
+            {
+                if(args[3] == "QM")
+                {
+                    if(userList[index].getTeam() == 0)
+                    {
+                        userList[index].setQM(true);
+                        console.log(userList[index].getTeam());
+                    }
+                    else
+                        sendError(msg,"A QM cannot take part in the quiz. Please remove user from team "+userList[index].getTeam()+" before continuing.");
+                    return;
+                }
+                else if(args[3] == "team")
+                {
+                    if(!args[4])
+                    {
+                        sendError(msg,ARGS_ERR);
+                        return;
+                    }
+                    let teamNumber = parseInt(args[4])-1;
+                    if(teamNumber>teamList.length)
+                    {
+                        sendError(msg,"That doesn't exist.");
+                        return;
+                    }
+                    if(userList[index].getTeam == 0)
+                    {
+                        userList[index].setTeam(teamNumber+1);
+                        teamList[teamNumber].addMember(userList[index].getName());
+                    }
+                    else
+                    {
+                        sendError(msg,"That user cannot be in that team.");
+                    }
+                }
+            }
+            else if(args[2] == "unset")
+            {
+                if(args[3] == "QM")
+                {
+                    userList[index].setQM(false);
+                    return;
+                }
+                else if(args[3] == "team")
+                {
+                    if(!args[4])
+                    {
+                        sendError(msg,ARGS_ERR);
+                        return;
+                    }
+                    let teamNumber = parseInt(args[4])-1;
+                    if(teamNumber>teamList.length)
+                    {
+                        sendError(msg,"That doesn't exist.");
+                        return;
+                    }
+                    if(teamList[teamNumber].members.indexOf(userList[index].getName(),0)>-1)
+                    {
+                        userList[index].setTeam(0);
+                        teamList[teamNumber].removeMember(userList[index].getName());
+                    }
+                    else
+                    {
+                        sendError(msg,"That user cannot me removed from that team.");
+                    }
+                }
+            }
+            else
+                sendError(msg);
+        break;
         case "Points":
             if(!args[1])
                 sendPoints(msg);
@@ -169,14 +308,14 @@ function startBounce(msg)
 
 function randomise(msg,size)
 {
-    playerNames = [];
+    playerNames=[];
     teamList = [];
     teamSize = parseInt(size);
     var teamString="";
     msg.channel.send("Randomising into teams of "+teamSize);
-    bot.users.cache.forEach(user => {
-        // if(!user.bot)
-            playerNames.push(user.username);
+    userList.forEach(user => {
+         if(!user.getQM())
+            playerNames.push(user.getName());
     });
    numPlayers  = playerNames.length;
    playerNames = shuffle(playerNames);
@@ -188,9 +327,15 @@ function randomise(msg,size)
         for(let j=0;j+pos<numPlayers && j < teamSize ;++j)
         {
             Team.addMember(playerNames[pos+j]);
+            let results = userList.filter(user => {
+                return user.getName()==playerNames[pos+j];
+            });
+            results[0].setTeam(i+1);
+
         }
         teamList.push(Team);
    }
+   showTeam(msg);
 }
 
 function shuffle(arr)
@@ -228,8 +373,66 @@ function sendPodium(msg)
     });
 
     let podium = "" ;
-    podium = "First Place: Team " + copy[0].getTeamNumber()+" with "+ copy[0].getPoints() +" points\n";
-    podium += "Second Place: Team " + copy[1].getTeamNumber()+" with "+ copy[1].getPoints() +" points\n";
-    podium += "Third Place: Team " + copy[2].getTeamNumber()+" with "+ copy[2].getPoints() +" points";
+    if(copy.length>0)
+    {
+        podium = "First Place: Team " + copy[0].getTeamNumber()+" with "+ copy[0].getPoints() +" points\n";
+        if(copy.length>1)
+            podium += "Second Place: Team " + copy[1].getTeamNumber()+" with "+ copy[1].getPoints() +" points\n";
+        if(copy.length>2)
+            podium += "Third Place: Team " + copy[2].getTeamNumber()+" with "+ copy[2].getPoints() +" points";
+    }
+    else
+        podium="No players are ready yet";
     msg.channel.send(podium);
+}
+
+function showTeam(msg)
+{
+    teamInfo="";
+    teamList.forEach((team,i)=>{
+        if(teamInfo!="")
+            teamInfo+="\n";
+        teamInfo+="Team "+(i+1)+": "+team.getMembers().toString();
+    });
+    msg.channel.send(teamInfo);
+}
+
+function init(msg)
+{
+    userList=[];
+    teamList=[];
+    let i=1;
+    msg.guild.members.fetch().then(map=>{
+        var vals= map.values();
+       for(val of vals)
+       {
+            if(!val.user.bot && val.user.presence.status =="online")
+            {
+                userList.push(new Users(val.user.username,i));
+                ++i;
+            }
+       }
+    });
+}
+
+function list(msg)
+{
+    users="";
+    userList.forEach((user,i)=>
+    {
+        if(i!=0)
+            users+="\n";
+        users+=user.getName()+" -number: "+user.getNumber();
+    });
+    msg.channel.send(users);
+}
+
+function userExists(key)
+{
+  var results= userList.filter(user => {
+        return (user.getName() == key || user.getNumber() == key)
+    });
+    if(results.length!=1)
+        return -1;
+    return results[0].getNumber()-1;
 }

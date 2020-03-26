@@ -3,7 +3,6 @@ module.exports = class Team
     constructor(number)
     {
         this.points=0;
-        this.pounceState=false;
         this.members=[];
         this.teamSize=0;
         this.teamNumber=number;
@@ -15,16 +14,12 @@ module.exports = class Team
     }
     removeMember(member)
     {
-        let index = this.members.indexOf(member,1);
+        let index = this.members.indexOf(member,0);
         if(index > -1)
         {
             this.members.splice(index,1);
             this.teamSize-=1;
         }
-    }
-    setPounceState(pounce)
-    {
-        this.pounceState = pounce;
     }
     setPoints(points)
     {

@@ -1,0 +1,36 @@
+  
+  '531101025612988417' => GuildMember { 
+    user:
+     User {
+       id: '531101025612988417',
+       bot: false,
+       username: 'heisenbohr',
+       discriminator: '5531',
+       avatar: null,
+       lastMessageID: '692695884403703889',
+       lastMessageChannelID: '692388091645657161' },
+    joinedTimestamp: 1585148585009,
+    lastMessageID: '692695884403703889',
+    lastMessageChannelID: '692388091645657161',
+    premiumSinceTimestamp: null,
+    deleted: false,
+    _roles: [] },
+  '692397341105455135' => GuildMember {
+    user:
+     ClientUser {
+       id: '692397341105455135',
+       bot: true,
+       username: 'ScoreboardBot',
+       discriminator: '9749',
+       avatar: null,
+       lastMessageID: null,
+       lastMessageChannelID: null,
+       verified: true,
+       mfaEnabled: true,
+       _typing: Map {} },
+    joinedTimestamp: 1585151231733,
+    lastMessageID: null,
+    lastMessageChannelID: null,
+    premiumSinceTimestamp: null,
+    deleted: false,
+    _roles: [ '692399192831688794' ] } 
