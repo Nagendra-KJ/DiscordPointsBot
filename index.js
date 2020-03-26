@@ -5,7 +5,7 @@ const Teams = require('./teams');
 
 const Users = require('./users');
 
-const token = "NjkyMzk3MzQxMTA1NDU1MTM1.XnzsLg.2Y5sjlMxmPTlrUX7MT0EspoxSv0";
+const token = process.env.BOT_TOKEN;
 
 const ARGS_ERR ="I need more arguments.";
 
